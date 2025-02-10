@@ -39,6 +39,7 @@ Web app which enables the user to enter data to generate a certificate using a t
 - [**svelte** *5.19.6*](https://svelte.dev/)
 - [**vite** *6.1.0*](https://vite.dev/)
 - [**concurrently** *9.1.2*](https://www.npmjs.com/package/concurrently)
+- [**better-sqlite3** *11.8.1*](https://www.npmjs.com/package/better-sqlite3)
 
 ## Directory Structure
 

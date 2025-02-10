@@ -7,9 +7,12 @@ Web app which enables the user to enter data to generate a certificate using a t
 ## Installation & Running the Project
 
 ## Technologies used
-- [**Node.js** *v22.13.1*](https://nodejs.org/en/download)
-- [**Express.js** *v4.21.2*](https://expressjs.com)
-- [**nodemon** *v3.1.9*](https://www.npmjs.com/package/nodemon)
+- [**Node.js** *22.13.1*](https://nodejs.org/en/download)
+- [**Express.js** *4.21.2*](https://expressjs.com)
+- [**nodemon** *3.1.9*](https://www.npmjs.com/package/nodemon)
+- [**dotenv** *16.4.7*](https://www.npmjs.com/package/dotenv)
+- [**jsonwebtoken** *9.0.2*](https://www.npmjs.com/package/jsonwebtoken)
+
 
 ## Directory Structure
 

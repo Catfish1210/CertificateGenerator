@@ -28,7 +28,14 @@ Web app which enables the user to enter data to generate a certificate using a t
 >>```
 >> *Runs the Backend & Frontend concurrently*
 >
-
+>> 
+>> #### Tests
+>>
+>>```bash
+>>$ npm run backend-test
+>>```
+>> *Runs the Backend tests with Jest*
+>
 
 ## Technologies used
 - [**Node.js** *22.13.1*](https://nodejs.org/en/download)
@@ -40,6 +47,7 @@ Web app which enables the user to enter data to generate a certificate using a t
 - [**vite** *6.1.0*](https://vite.dev/)
 - [**concurrently** *9.1.2*](https://www.npmjs.com/package/concurrently)
 - [**better-sqlite3** *11.8.1*](https://www.npmjs.com/package/better-sqlite3)
+- [**jest** *29.7.0*](https://www.npmjs.com/package/jest)
 
 ## Directory Structure
 

@@ -4,6 +4,7 @@
   "description": "## Project Description Web app which enables the user to enter data to generate a certificate using a template, and download the document as a PDF.",
   "main": "index.js",
   "scripts": {
+    "backend": "npm run dev --prefix backend",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

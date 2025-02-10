@@ -2,7 +2,8 @@ const Database = require('better-sqlite3');
 const fs = require('fs');
 const path = require('path');
 
-const dbFile = 'app.sqlite';
+const dbFile = process.env.NODE_ENV === 'test' ? 'db-test.sqlite' : 'app.sqlite';
+
 const dbPath = path.join(__dirname, dbFile);
 const dbExists = fs.existsSync(dbPath);
 

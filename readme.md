@@ -6,6 +6,30 @@ Web app which enables the user to enter data to generate a certificate using a t
 
 ## Installation & Running the Project
 
+> ### Different ways to run the project:
+>> #### Backend
+>>```bash
+>>$ npm run backend
+>>```
+>> *Runs only the backend*
+>
+>> #### Frontend
+>>
+>>```bash
+>>$ npm run frontend
+>>```
+>> *Runs only the frontend*
+>
+>> 
+>> #### Concurrently
+>>
+>>```bash
+>>$ npm run start
+>>```
+>> *Runs the Backend & Frontend concurrently*
+>
+
+
 ## Technologies used
 - [**Node.js** *22.13.1*](https://nodejs.org/en/download)
 - [**Express.js** *4.21.2*](https://expressjs.com)

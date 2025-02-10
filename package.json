@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "backend": "npm run dev --prefix backend",
+    "frontend": "npm run dev --prefix frontend",
+    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/Catfish1210/CertificateGenerator/issues"
   },
-  "homepage": "https://github.com/Catfish1210/CertificateGenerator#readme"
+  "homepage": "https://github.com/Catfish1210/CertificateGenerator#readme",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
 }

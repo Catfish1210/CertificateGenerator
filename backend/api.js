@@ -12,6 +12,27 @@ const generateJWT = () => {
     return jwt.sign(payload, process.env.API_SECRET, { algorithm: 'HS256' });
 };
 
+// Fetch template data fields with templateID
+router.get("/templates/form/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const response = await fetch(`${process.env.API_BASE_URL}/templates/${id}/data`, {
+            headers: {
+                Authorization: `Bearer ${generateJWT()}`
+            }
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to fetch formData for template ${id}`);
+        }
+        
+        const data = await response.json();
+        res.json({ formData: data.response || {} });
+    } catch (err) {
+        console.error(`Failed to fetch formData for template ${id}:`, err);
+        return {}
+    }
+})
+
 // Fetch list of templates
 router.get('/templates', async (req, res) => {
     try {

@@ -1,5 +1,6 @@
 <script>
     import { onMount } from "svelte";
+    import { get } from "svelte/store";
     import { templates, selectedTemplateId } from "../store.js";
     let error = null;
 
@@ -14,11 +15,41 @@
         }
     };
 
+    const getTemplateForm = async (id) => {
+        try {
+            const response = await fetch(`/api/templates/form/${id}`);
+            if (!response.ok) throw new Error("Failed to fetch template form");
+            return await response.json();
+        } catch (err) {
+            console.error("Error fetching template form:", err);
+            error = err.message;
+            return null;
+        }
+    };
+
     onMount(loadTemplates);
 
     selectedTemplateId.subscribe(value => $selectedTemplateId = value);
-    const selectTemplate = (id) => {
-        selectedTemplateId.update(currentId => (currentId === id ? null : id));
+    const selectTemplate = async (id) => {
+        let currentTemplates = get(templates);
+        let currentSelected = get(selectedTemplateId);
+        if (currentSelected === id) {
+            selectedTemplateId.set(null);
+            return;
+        }
+        let template = currentTemplates.find(t => t.id === id);
+        if (!template) return;
+
+        if (!template.formData) {
+            const formFields = await getTemplateForm(id);
+            if (formFields) {
+                templates.update(templatesList => {
+                    return templatesList.map(t => (t.id === id ? { ...t, ...formFields } : t));
+                });
+            }
+        }
+
+        selectedTemplateId.set(id);
     };
 </script>
 
@@ -59,7 +90,10 @@
     <p style="color: red;">Error: {error}</p>
 {:else}
     <div class="template-container">
+        <!-- svelte-ignore a11y_label_has_associated_control -->
         {#each $templates as template}
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
             <label class="template-box { $selectedTemplateId === template.id ? 'selected' : '' }"
                 on:click={() => selectTemplate(template.id)}>
                 {template.name}

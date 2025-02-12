@@ -12,8 +12,41 @@ const generateJWT = () => {
     return jwt.sign(payload, process.env.API_SECRET, { algorithm: 'HS256' });
 };
 
-// Fetch template data fields with templateID
-router.get("/templates/form/:id", async (req, res) => {
+// Generate document [POST]
+router.post('/documents/generate', async (req, res) => {
+    const { templateId, formData } = req.body;
+    if(!templateId || !formData) {
+        return res.status(400).json({ error: "Missing templateId or formData" });
+    }
+
+    try {
+        const response = await fetch(`${process.env.API_BASE_URL}/documents/generate`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${generateJWT()}`
+            },
+            body: JSON.stringify({
+                template: {
+                    id: parseInt(templateId),
+                    data: formData,
+                },
+                format: "pdf",
+                output: "base64",
+                testing: true
+            })
+        });
+
+        const data = await response.json();
+        res.json({ pdf: data.response });
+    } catch (error) {
+        res.status(500).json({ error: `Failed to generate certificate: ${error}` });
+    }
+});
+
+
+// Fetch template data fields with templateID [GET]
+router.get('/templates/form/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const response = await fetch(`${process.env.API_BASE_URL}/templates/${id}/data`, {
@@ -33,7 +66,7 @@ router.get("/templates/form/:id", async (req, res) => {
     }
 })
 
-// Fetch list of templates
+// Fetch list of templates [GET]
 router.get('/templates', async (req, res) => {
     try {
         const response = await fetch(`${process.env.API_BASE_URL}/templates`, {

@@ -9,6 +9,7 @@
 		isString,
 		fieldConfig,
 		isPrototypeSpecificTemplate,
+        triggerDownload,
 	} from "../utils/formUtils";
     import { tick } from "svelte";
 	let formData = {
@@ -18,7 +19,6 @@
 		student_name: null,
 		subject: null
 	};
-
 	
 	let template = null;
 	let isSwitchOn = false;
@@ -42,14 +42,15 @@
 		isValidPrototype = isPrototypeSpecificTemplate(formData);
 	}
 
-	const handleSubmit = async (event) => {
+	const handleSubmit = async (event, type) => {
+		const isDownload = type === 'download';
 		event.preventDefault();
 		// Check image before request
 		const isImageValid = await isValidImageURL(formData.image);
 		if (!isImageValid) {
 			formValidity.image = false;
 			await tick();
-			console.log("INVALID IMG URL, not making req")
+			console.error("Invalid image URL (jpg, jpeg, png): not making request.");
 			return;
 		}
 
@@ -61,7 +62,8 @@
 				headers: { "Content-Type": "application/json"},
 				body: JSON.stringify({
 					templateId: $selectedTemplateId,
-					formData: {...formDataFields}
+					formData: {...formDataFields},
+					isDownload: isDownload
 				}),
 			});
 
@@ -72,25 +74,22 @@
 			const json = await response.json();
 			const base64PDF = json.pdf;
         	generatedPDF.set(base64PDF);
+
+			if (type === 'download') {
+				triggerDownload(base64PDF, 'certificate');
+			}
+
 			} catch (error) {
 				console.error(error);
 			}
 		};
 		await updateDocumentPreview();
-		// console.log("Form submitted with data:", formData);
 	};
 
 	const handleInputChange = async (fieldName, value) => {
-		console.log(`${fieldName} updated to : ${value}`);
 		template.formData[fieldName] = value;
 	};
 
-
-	const handleBlur = (field) => {
-		if (formValidity[field] === false) {
-			return;
-		}
-	};
 	// Reactive field checks
 	$: formValidity = {
 		image: formData.image !== null ? formData.image.length > 0 : true,
@@ -107,7 +106,7 @@
 	{/if}
 
 	<div class="form-container {isValidPrototype ? '' : 'invalid-template'}">
-		<form on:submit={handleSubmit}>
+		<form on:submit={(e) => handleSubmit(e, 'preview')}>
 			{#each Object.keys(formData) as fieldName}
 				<div class="form-group">
 					<label for={fieldName}>{fieldConfig[fieldName]?.placeholder ||fieldName}</label>
@@ -121,7 +120,6 @@
 							class:valid={formValidity[fieldName]}
 							class:invalid={!formValidity[fieldName]}
 							on:input={(e) => handleInputChange(fieldName, e.currentTarget.value)}
-							on:blur={() => handleBlur(fieldName)}
 						/>
 						{#if !formValidity[fieldName]}
 							<p class="error-message">{fieldConfig[fieldName]?.errorMessage || "Invalid input."}</p>
@@ -129,7 +127,10 @@
 					</div>
 				</div>
 			{/each}
-			<button type="submit">Preview document</button>
+			<div class="btn-container">
+				<button type="submit" on:click={(e) => handleSubmit(e, 'preview')}>Preview document</button>
+				<button class="download-btn" type="button" on:click={(e) => handleSubmit(e, 'download')}>Download document</button>
+			</div>
 		</form>
 		<div class="toggle-container">
 			{#if isValidPrototype}
@@ -240,5 +241,20 @@
 	
 	button:active {
 		background-color: #505050;
+	}
+
+	.download-btn {
+		border-color: #1dc71d;
+	}
+
+	.download-btn:hover {
+		border-color: #4ec14e;
+	}
+
+	.btn-container {
+		margin-top: 1rem;
+		display: flex;
+		justify-content: center;
+		gap: 5%;
 	}
 </style>

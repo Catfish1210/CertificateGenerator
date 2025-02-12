@@ -14,7 +14,7 @@ const generateJWT = () => {
 
 // Generate document [POST]
 router.post('/documents/generate', async (req, res) => {
-    const { templateId, formData } = req.body;
+    const { templateId, formData, isDownload } = req.body;
     if(!templateId || !formData) {
         return res.status(400).json({ error: "Missing templateId or formData" });
     }

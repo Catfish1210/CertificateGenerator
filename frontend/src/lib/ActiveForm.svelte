@@ -1,7 +1,7 @@
 <script>
 	// @ts-nocheck
 	import Switch from "./Switch.svelte";
-	import { selectedTemplateId, templates } from "../store";
+	import { selectedTemplateId, templates, generatedPDF } from "../store";
 	import { get } from "svelte/store";
 	import {
 		isValidDate,
@@ -25,10 +25,33 @@
 		isValidPrototype = isPrototypeSpecificTemplate(formData);
 	}
 
-	const handleSubmit = (event) => {
+	const handleSubmit = async (event) => {
 		event.preventDefault();
-		// TODO
-		console.log("Form submitted with data:", formData);
+		const formDataFields = { date: formData.date, image: formData.image, signature_name: formData.signature_name, student_name: formData.student_name, subject: formData.subject };
+		const updateDocumentPreview = async () => {
+        try {
+			const response = await fetch("api/documents/generate", {
+				method: "POST",
+				headers: { "Content-Type": "application/json"},
+				body: JSON.stringify({
+					templateId: $selectedTemplateId,
+					formData: {...formDataFields}
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to generate PDF");
+			}
+
+			const json = await response.json();
+			const base64PDF = json.pdf;
+        	generatedPDF.set(base64PDF);
+			} catch (error) {
+				console.error(error);
+			}
+		};
+		await updateDocumentPreview();
+		// console.log("Form submitted with data:", formData);
 	};
 
 	const handleInputChange = (fieldName, value) => {
@@ -57,7 +80,7 @@
 		}
 		touchedFields[field] = false;
 	};
-
+	// Reactive field checks
 	$: formValidity = {
 		image: touchedFields.image ? isValidImageURL(formData.image) : true,
 		date: touchedFields.date ? isValidDate(formData.date) : true,
@@ -69,9 +92,7 @@
 
 {#if formData}
 	{#if !isValidPrototype}
-		<p class="overlay-text">
-			Invalid template: Not prototype-specific template
-		</p>
+		<p class="overlay-text">Invalid template: Not prototype-specific template</p>
 	{/if}
 
 	<div class="form-container {isValidPrototype ? '' : 'invalid-template'}">
@@ -98,7 +119,7 @@
 					</div>
 				</div>
 			{/each}
-			<button type="submit">Generate Certificate</button>
+			<button type="submit">Preview document</button>
 		</form>
 		<div class="toggle-container">
 			{#if isValidPrototype}
@@ -194,14 +215,20 @@
 
 	button {
 		padding: 0.7rem;
-		background-color: #4caf50;
+		background-color: #363636;
 		color: white;
-		border: none;
-		border-radius: 4px;
+		border: 3px solid #6c18e2;
+		border-radius: 6px;
 		cursor: pointer;
+		transition: all 0.25s ease;
 	}
 
 	button:hover {
-		background-color: #45a049;
+		background-color: #484848;
+		border-color: #942bf0;
+	}
+	
+	button:active {
+		background-color: #505050;
 	}
 </style>

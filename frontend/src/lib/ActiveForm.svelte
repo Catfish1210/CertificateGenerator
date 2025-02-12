@@ -10,8 +10,16 @@
 		fieldConfig,
 		isPrototypeSpecificTemplate,
 	} from "../utils/formUtils";
+    import { tick } from "svelte";
+	let formData = {
+		image: null,
+		date: null,
+		signature_name: null,
+		student_name: null,
+		subject: null
+	};
 
-	let formData = null;
+	
 	let template = null;
 	let isSwitchOn = false;
 	// Checks if the template is valid and matches provided template_certificate.json
@@ -21,12 +29,30 @@
 		const selectedId = $selectedTemplateId;
 		const currentTemplates = get(templates);
 		template = currentTemplates ? currentTemplates.find((t) => t.id === selectedId) : null;
-		formData = template ? { ...template.formData } : {};
+		if (template) {
+			formData = {
+				date: formData.date !== null ? formData.date : (template.formData?.date || null),
+				image: formData.image !== null ? formData.image : (template.formData?.image || null),
+				signature_name: formData.signature_name !== null ? formData.signature_name : (template.formData?.signature_name || null),
+				student_name: formData.student_name !== null ? formData.student_name : (template.formData?.student_name || null),
+				subject: formData.subject !== null ? formData.subject : (template.formData?.subject || null)
+			};
+		}
+		
 		isValidPrototype = isPrototypeSpecificTemplate(formData);
 	}
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
+		// Check image before request
+		const isImageValid = await isValidImageURL(formData.image);
+		if (!isImageValid) {
+			formValidity.image = false;
+			await tick();
+			console.log("INVALID IMG URL, not making req")
+			return;
+		}
+
 		const formDataFields = { date: formData.date, image: formData.image, signature_name: formData.signature_name, student_name: formData.student_name, subject: formData.subject };
 		const updateDocumentPreview = async () => {
         try {
@@ -54,39 +80,24 @@
 		// console.log("Form submitted with data:", formData);
 	};
 
-	const handleInputChange = (fieldName, value) => {
+	const handleInputChange = async (fieldName, value) => {
 		console.log(`${fieldName} updated to : ${value}`);
-		if (value.length === 0) {
-			touchedFields[fieldName] = false;
-		}
 		template.formData[fieldName] = value;
 	};
 
-	let touchedFields = {
-		image: false,
-		date: false,
-		signature_name: false,
-		student_name: false,
-		subject: false,
-	};
-
-	const handleFocus = (field) => {
-		touchedFields[field] = true;
-	};
 
 	const handleBlur = (field) => {
 		if (formValidity[field] === false) {
 			return;
 		}
-		touchedFields[field] = false;
 	};
 	// Reactive field checks
 	$: formValidity = {
-		image: touchedFields.image ? isValidImageURL(formData.image) : true,
-		date: touchedFields.date ? isValidDate(formData.date) : true,
-		signature_name: touchedFields.signature_name ? isString(formData.signature_name) : true,
-		student_name: touchedFields.student_name ? isString(formData.student_name) : true,
-		subject: touchedFields.subject ? isString(formData.subject) : true,
+		image: formData.image !== null ? formData.image.length > 0 : true,
+		date: formData.date !== null ? isValidDate(formData.date) : true,
+		signature_name: formData.signature_name !== null ? isString(formData.signature_name) && formData.signature_name.length > 0 : true,
+		student_name: formData.student_name !== null ? isString(formData.student_name) && formData.student_name.length > 0 : true,
+		subject: formData.subject !== null ? isString(formData.subject) && formData.subject.length > 0 : true
 	};
 </script>
 
@@ -109,11 +120,10 @@
 							required
 							class:valid={formValidity[fieldName]}
 							class:invalid={!formValidity[fieldName]}
-							on:focus={() => handleFocus(fieldName)}
 							on:input={(e) => handleInputChange(fieldName, e.currentTarget.value)}
 							on:blur={() => handleBlur(fieldName)}
 						/>
-						{#if touchedFields[fieldName] && !formValidity[fieldName]}
+						{#if !formValidity[fieldName]}
 							<p class="error-message">{fieldConfig[fieldName]?.errorMessage || "Invalid input."}</p>
 						{/if}
 					</div>

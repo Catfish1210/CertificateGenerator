@@ -1,4 +1,5 @@
 require('dotenv').config();
+const { handleApiError, handleCatchError} = require('./errorHandler');
 const express = require('express');
 const router = express.Router();
 
@@ -75,6 +76,12 @@ router.get('/templates', async (req, res) => {
                 Authorization: `Bearer ${generateJWT()}`
             }
         });
+        
+        if (!response.ok) {
+            const errResponse = await response.json();
+            return handleApiError(response.status, errResponse.message, res);
+        }
+
         const data = await response.json();
         const ID = data.response[0].id;
         if (ID) {
@@ -82,8 +89,8 @@ router.get('/templates', async (req, res) => {
         } else {
             res.status(404).json({ error: "ID for Template with the name 'Certificate Example' not found" });
         }
-    } catch (error) {
-        res.status(500).json({ error: "Failed to fetch templates" });
+    } catch (err) {
+        handleCatchError(err, res);
     }
 });
 

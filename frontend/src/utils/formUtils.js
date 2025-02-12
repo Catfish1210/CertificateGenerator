@@ -4,9 +4,15 @@ export const isValidDate = (value) => {
 	return !isNaN(date.getTime());
 };
 
-export const isValidImageURL = (value) => {
-	if (!value) return false;
-	return /^https?:\/\/.+\.(jpg|jpeg|png)$/i.test(value);
+// Check for MIME type with HEAD req (Fails when CORS err)
+export const isValidImageURL = async (url) => {
+	try {
+		const res = await fetch(url, {method: 'HEAD' });
+		const contentType = res.headers.get('Content-Type');
+		return (contentType && contentType.startsWith('image'));
+	} catch (err) {
+		return false; // e.g. CORS err.
+	}
 };
 
 export const isString = (value) => {
@@ -60,4 +66,11 @@ export const fieldConfig = {
 		validate: isString,
 		errorMessage: "Invalid Subject",
 	},
+};
+
+export const triggerDownload = (base64PDF, filename) => {
+    const link = document.createElement('a');
+    link.href = `data:application/pdf;base64,${base64PDF}`;
+    link.download = `${filename}.pdf`;
+    link.click();
 };

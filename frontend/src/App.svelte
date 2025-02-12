@@ -1,7 +1,8 @@
 <script>
 	import ActiveForm from "./lib/ActiveForm.svelte";
+    import DocumentPreview from "./lib/DocumentPreview.svelte";
 	import Templates from "./lib/Templates.svelte";
-	import { selectedTemplateId } from "./store";
+	import { generatedPDF, selectedTemplateId } from "./store";
 </script>
 
 <main>
@@ -22,9 +23,11 @@
 				</div>
 			</div>
 		{/if}
-		<div class="section">
-
-		</div>
+		{#if $selectedTemplateId !== null && $generatedPDF !== null }
+			<div id="document-preview-section" class="section">
+				<DocumentPreview />
+			</div>
+		{/if}
 	</div>
 </main>
 

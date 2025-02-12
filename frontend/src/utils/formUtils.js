@@ -4,16 +4,12 @@ export const isValidDate = (value) => {
 	return !isNaN(date.getTime());
 };
 
-// Check for MIME type with HEAD req (Fails when )
+// Check for MIME type with HEAD req (Fails when CORS err)
 export const isValidImageURL = async (url) => {
 	try {
 		const res = await fetch(url, {method: 'HEAD' });
 		const contentType = res.headers.get('Content-Type');
-		if (contentType && contentType.startsWith('image')) {
-			return true
-		}
-
-		return false
+		return (contentType && contentType.startsWith('image'));
 	} catch (err) {
 		return false; // e.g. CORS err.
 	}

@@ -66,17 +66,22 @@ router.get('/templates/form/:id', async (req, res) => {
     }
 })
 
-// Fetch list of templates [GET]
+
+// Fetch a template with matching name and then return the ID: 'Certificate Example' [GET]
 router.get('/templates', async (req, res) => {
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/templates`, {
+        const response = await fetch(`${process.env.API_BASE_URL}/templates?name=Certificate Example&per_page=1`, {
             headers: {
                 Authorization: `Bearer ${generateJWT()}`
             }
         });
         const data = await response.json();
-        console.log(data);
-        res.json(data);
+        const ID = data.response[0].id;
+        if (ID) {
+            res.json({ id: ID });
+        } else {
+            res.status(404).json({ error: "ID for Template with the name 'Certificate Example' not found" });
+        }
     } catch (error) {
         res.status(500).json({ error: "Failed to fetch templates" });
     }

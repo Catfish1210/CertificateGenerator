@@ -4,9 +4,19 @@ export const isValidDate = (value) => {
 	return !isNaN(date.getTime());
 };
 
-export const isValidImageURL = (value) => {
-	if (!value) return false;
-	return /^https?:\/\/.+\.(jpg|jpeg|png)$/i.test(value);
+// Check for MIME type with HEAD req (Fails when )
+export const isValidImageURL = async (url) => {
+	try {
+		const res = await fetch(url, {method: 'HEAD' });
+		const contentType = res.headers.get('Content-Type');
+		if (contentType && contentType.startsWith('image')) {
+			return true
+		}
+
+		return false
+	} catch (err) {
+		return false; // e.g. CORS err.
+	}
 };
 
 export const isString = (value) => {

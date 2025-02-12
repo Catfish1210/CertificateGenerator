@@ -19,9 +19,11 @@
 		student_name: null,
 		subject: null
 	};
-	
 	let template = null;
 	let isSwitchOn = false;
+	let lastUpdateTimestamp = 0;
+	const autoUpdateInterval = 5000; //ms
+	let previousFormSubmission = { ...formData };
 	// Checks if the template is valid and matches provided template_certificate.json
 	let isValidPrototype = true;
 
@@ -79,12 +81,23 @@
 				triggerDownload(base64PDF, 'certificate');
 			}
 
+			previousFormSubmission = { ...formData };
 			} catch (error) {
 				console.error(error);
 			}
 		};
 		await updateDocumentPreview();
 	};
+
+	const autoUpdatePreview = () => {
+		if (isSwitchOn && Object.values(formValidity).every((valid) => valid) && 
+		Date.now() - lastUpdateTimestamp >= autoUpdateInterval &&
+		JSON.stringify(formData) !== JSON.stringify(previousFormSubmission)
+		) {
+			document.querySelector("button[type='submit']").click();
+			lastUpdateTimestamp = Date.now();
+		}
+	}
 
 	const handleInputChange = async (fieldName, value) => {
 		template.formData[fieldName] = value;
@@ -98,6 +111,8 @@
 		student_name: formData.student_name !== null ? isString(formData.student_name) && formData.student_name.length > 0 : true,
 		subject: formData.subject !== null ? isString(formData.subject) && formData.subject.length > 0 : true
 	};
+
+	setInterval(autoUpdatePreview, autoUpdateInterval);
 </script>
 
 {#if formData}
@@ -127,10 +142,12 @@
 					</div>
 				</div>
 			{/each}
-			<div class="btn-container">
-				<button type="submit" on:click={(e) => handleSubmit(e, 'preview')}>Preview document</button>
-				<button class="download-btn" type="button" on:click={(e) => handleSubmit(e, 'download')}>Download document</button>
-			</div>
+			{#if isValidPrototype}
+				<div class="btn-container">
+					<button type="submit" on:click={(e) => handleSubmit(e, 'preview')}>Preview document</button>
+					<button class="download-btn" type="button" on:click={(e) => handleSubmit(e, 'download')}>Download document</button>
+				</div>
+			{/if}
 		</form>
 		<div class="toggle-container">
 			{#if isValidPrototype}

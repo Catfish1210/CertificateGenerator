@@ -67,3 +67,10 @@ export const fieldConfig = {
 		errorMessage: "Invalid Subject",
 	},
 };
+
+export const triggerDownload = (base64PDF, filename) => {
+    const link = document.createElement('a');
+    link.href = `data:application/pdf;base64,${base64PDF}`;
+    link.download = `${filename}.pdf`;
+    link.click();
+};

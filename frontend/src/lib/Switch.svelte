@@ -9,7 +9,7 @@
 <div style="display: flex; flex-direction: column; align-items: center; width: fit-content;">
     <input type="checkbox" id="switch" bind:checked />
     <label for="switch" style="width: {width}; height: {height}; transform: scale({objScale});">{label}</label>
-    <p style="user-select: none; margin: 0; text-align: center;">Auto refresh: {checked ? "ON" : "OFF"}</p>
+    <p style="user-select: none; margin: 0; text-align: center;">Auto refresh (5s): {checked ? "ON" : "OFF"}</p>
 </div>
 
 <style>

@@ -51,12 +51,9 @@
 			}
 
 			const json = await response.json();
+			// [WIP]
 			const base64PDF = json.pdf;
         	generatedPDF.set(base64PDF);
-
-			if (type === 'download') {
-				triggerDownload(base64PDF, 'certificate');
-			}
 
 			previousFormSubmission = { ...$formData };
 		} catch (error) {
@@ -64,6 +61,11 @@
 		}
 		};
 		await updateDocumentPreview();
+
+		if (type === 'download') {
+			let pdf = get(generatedPDF);
+			triggerDownload(pdf, 'certificate');
+		}
 	};
 
 	const autoUpdatePreview = () => {

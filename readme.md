@@ -4,38 +4,79 @@
 ## Project Description
 Web app which enables the user to enter data to generate a certificate using a template, and download the document as a PDF.
 
-## Installation & Running the Project
+## Setup & Running the Project
+### 1. Navigate to the project root directory
+```bash
+cd CertificateGenerator/
+```
+---
+### 2. Install the required dependencies
+```bash
+npm install
+```
+---
+### 3. Environment Configuration
+To get started, you need to set up the environment variables required by the application. Follow these steps:
 
-> ### Different ways to run the project:
->> #### Backend
+##### 3.1) Navigate to the backend directory:
+```bash
+cd backend/
+```
+##### 3.2) Create a copy of the `.env.example` file and rename it to `.env`:
+```bash
+cp .env.example .env
+```
+##### 3.3) Open the newly created `.env` file and configure the necessary API keys according to your environment
+---
+### 4. Running the project
+##### 4.1) Navigate back to the project root directory:
+```bash
+cd ..
+```
+##### 4.2) Run the project:
+```bash
+npm run start
+```
+##### 4.3) Navigate to the app via browser:
+``http://localhost:3030/``
+
+---
+### Other ways to run the project
+>---
+> ### Backend
 >>```bash
->>$ npm run backend
+>> npm run backend
 >>```
->> *Runs only the backend*
+>- *Runs only the backend*
+>---
+
+>---
+> ### Frontend
 >
->> #### Frontend
->>
 >>```bash
->>$ npm run frontend
+>> npm run frontend
 >>```
->> *Runs only the frontend*
+>- *Runs only the frontend*
+>---
+
+>---
+> ### Concurrently
 >
->> 
->> #### Concurrently
->>
 >>```bash
->>$ npm run start
+>> npm run start
 >>```
->> *Runs the Backend & Frontend concurrently*
+>- *Runs the backend & frontend concurrently*
+>---
+
+>---
+> ### Running Tests
 >
->> 
->> #### Tests
->>
 >>```bash
->>$ npm run backend-test
+>> npm run backend-test
 >>```
->> *Runs the Backend tests with Jest*
->
+>- *Runs the backend tests with Jest*
+>---
+
 
 ## Technologies used
 - [**Node.js** *22.13.1*](https://nodejs.org/en/download)

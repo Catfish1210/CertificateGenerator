@@ -6,11 +6,11 @@ const router = express.Router();
 const generateJWT = () => {
     const jwt = require('jsonwebtoken');
     const payload = {
-        iss: process.env.API_KEY,
-        sub: process.env.WORKSPACE_ID,
+        iss: process.env.PDF_GENERATOR_API_KEY,
+        sub: process.env.PDF_GENERATOR_API_WORKSPACE_ID,
         exp: Math.floor(Date.now() / 1000) + 3 // 3 sec
     };
-    return jwt.sign(payload, process.env.API_SECRET, { algorithm: 'HS256' });
+    return jwt.sign(payload, process.env.PDF_GENERATOR_API_SECRET, { algorithm: 'HS256' });
 };
 
 // Generate document [POST]
@@ -21,7 +21,7 @@ router.post('/documents/generate', async (req, res) => {
     }
 
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/documents/generate`, {
+        const response = await fetch(`${process.env.PDF_GENERATOR_API_BASE_URL}/documents/generate`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -54,7 +54,7 @@ router.post('/documents/generate', async (req, res) => {
 // Fetch a template with matching name and then return the ID: 'Certificate Example' [GET]
 router.get('/templates', async (req, res) => {
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/templates?name=Certificate Example&per_page=1`, {
+        const response = await fetch(`${process.env.PDF_GENERATOR_API_BASE_URL}/templates?name=Certificate Example&per_page=1`, {
             headers: {
                 Authorization: `Bearer ${generateJWT()}`
             }

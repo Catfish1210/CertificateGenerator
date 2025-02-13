@@ -1,7 +1,7 @@
 <script>
-    import { onMount } from "svelte";
+    import { onMount, tick } from "svelte";
     import { get } from "svelte/store";
-    import { templates, selectedTemplateId } from "../store.js";
+    import { CertificateTemplateID, selectedTemplateId } from "../store.js";
     let error = null;
 
     const loadTemplates = async () => {
@@ -9,47 +9,23 @@
             const response = await fetch("/api/templates");
             if (!response.ok) throw new Error("Failed to fetch templates");
             const data = await response.json();
-            templates.set(data.response);
+            CertificateTemplateID.set(data.id);
         } catch (err) {
             error = err.message;
         }
+
     };
-
-    const getTemplateForm = async (id) => {
-        try {
-            const response = await fetch(`/api/templates/form/${id}`);
-            if (!response.ok) throw new Error("Failed to fetch template form");
-            return await response.json();
-        } catch (err) {
-            console.error("Error fetching template form:", err);
-            error = err.message;
-            return null;
+    onMount(async () => {
+        await loadTemplates();
+    });
+    let id;
+    $: {id = get(CertificateTemplateID)}
+    const toggleSelectedTemplate = () => {
+        if (get(CertificateTemplateID) === get(CertificateTemplateID)) {
+            selectedTemplateId.set(null);  
+        } else {
+            selectedTemplateId.set(get(CertificateTemplateID));
         }
-    };
-
-    onMount(loadTemplates);
-
-    selectedTemplateId.subscribe(value => $selectedTemplateId = value);
-    const selectTemplate = async (id) => {
-        let currentTemplates = get(templates);
-        let currentSelected = get(selectedTemplateId);
-        if (currentSelected === id) {
-            selectedTemplateId.set(null);
-            return;
-        }
-        let template = currentTemplates.find(t => t.id === id);
-        if (!template) return;
-
-        if (!template.formData) {
-            const formFields = await getTemplateForm(id);
-            if (formFields) {
-                templates.update(templatesList => {
-                    return templatesList.map(t => (t.id === id ? { ...t, ...formFields } : t));
-                });
-            }
-        }
-
-        selectedTemplateId.set(id);
     };
 </script>
 
@@ -89,15 +65,14 @@
 {#if error}
     <p style="color: red;">Error: {error}</p>
 {:else}
+    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
     <div class="template-container">
         <!-- svelte-ignore a11y_label_has_associated_control -->
-        {#each $templates as template}
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
-            <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-            <label class="template-box { $selectedTemplateId === template.id ? 'selected' : '' }"
-                on:click={() => selectTemplate(template.id)}>
-                {template.name}
-            </label>
-        {/each}
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <label class="template-box {get(selectedTemplateId) === get(CertificateTemplateID) ? 'selected' : ''}"
+                on:click={toggleSelectedTemplate}>
+                Certificate Example
+        </label>
+
     </div>
 {/if}

@@ -19,12 +19,10 @@
     onMount(async () => {
         await loadTemplates();
     });
-
 </script>
 
 <main>
 	<h1 class="glow title">Certificate Generator</h1>
-
 	<div class="section-container">
 			<div id="form-section" class="section">
 				<div>
@@ -42,7 +40,7 @@
 	#form-section {
 		display: flex;
 		justify-content: center;
-		width: 50vh;
+		width: 58vh;
 	}
 
 	.section {

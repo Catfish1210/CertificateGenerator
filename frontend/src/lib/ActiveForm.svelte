@@ -153,10 +153,9 @@
 
 	.form-group {
 		border-top: 2px solid #ffffff;
-		padding: 0.5rem;
+		padding: 0.3rem;
 		display: flex;
 		flex-direction: row;
-		margin-bottom: 1rem;
 		justify-content: space-between;
 		overflow: scroll;
 	}
@@ -174,13 +173,14 @@
 	}
 
 	label {
-		margin-top: 0.5rem;
+		margin-top: 0.4rem;
+		font-weight: 500;
 	}
 
 	input {
 		background-color: #16161673;
 		width: 25vh;
-		padding: 0.5rem;
+		padding: 0.4rem;
 		font-size: 1rem;
 		border-radius: 4px;
 		border: 2px solid #6c18e2;

@@ -38,34 +38,17 @@ router.post('/documents/generate', async (req, res) => {
             })
         });
 
+        if (!response.ok) {
+            const errResponse = await response.json();
+            return handleApiError(response.status, errResponse.message, res);
+        }
+
         const data = await response.json();
         res.json({ pdf: data.response });
     } catch (error) {
         res.status(500).json({ error: `Failed to generate certificate: ${error}` });
     }
 });
-
-
-// Fetch template data fields with templateID [GET]
-router.get('/templates/form/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        const response = await fetch(`${process.env.API_BASE_URL}/templates/${id}/data`, {
-            headers: {
-                Authorization: `Bearer ${generateJWT()}`
-            }
-        });
-        if (!response.ok) {
-            throw new Error(`Failed to fetch formData for template ${id}`);
-        }
-        
-        const data = await response.json();
-        res.json({ formData: data.response || {} });
-    } catch (err) {
-        console.error(`Failed to fetch formData for template ${id}:`, err);
-        return {}
-    }
-})
 
 
 // Fetch a template with matching name and then return the ID: 'Certificate Example' [GET]

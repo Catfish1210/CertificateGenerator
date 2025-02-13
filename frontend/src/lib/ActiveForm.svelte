@@ -1,54 +1,22 @@
 <script>
 	// @ts-nocheck
 	import Switch from "./Switch.svelte";
-	import { selectedTemplateId, templates, generatedPDF } from "../store";
+	import { selectedTemplateId, generatedPDF, formData, CertificateTemplateID } from "../store";
 	import { get } from "svelte/store";
-	import {
-		isValidDate,
-		isValidImageURL,
-		isString,
-		fieldConfig,
-		isPrototypeSpecificTemplate,
-        triggerDownload,
-	} from "../utils/formUtils";
+	import { isValidDate, isValidImageURL, isString, fieldConfig, triggerDownload } from "../utils/formUtils";
     import { tick } from "svelte";
-	let formData = {
-		image: null,
-		date: null,
-		signature_name: null,
-		student_name: null,
-		subject: null
-	};
-	let template = null;
+
+	// Auto refresh feature variables
 	let isSwitchOn = false;
 	let lastUpdateTimestamp = 0;
-	const autoUpdateInterval = 5000; //ms
-	let previousFormSubmission = { ...formData };
-	// Checks if the template is valid and matches provided template_certificate.json
-	let isValidPrototype = true;
-
-	$: {
-		const selectedId = $selectedTemplateId;
-		const currentTemplates = get(templates);
-		template = currentTemplates ? currentTemplates.find((t) => t.id === selectedId) : null;
-		if (template) {
-			formData = {
-				date: formData.date !== null ? formData.date : (template.formData?.date || null),
-				image: formData.image !== null ? formData.image : (template.formData?.image || null),
-				signature_name: formData.signature_name !== null ? formData.signature_name : (template.formData?.signature_name || null),
-				student_name: formData.student_name !== null ? formData.student_name : (template.formData?.student_name || null),
-				subject: formData.subject !== null ? formData.subject : (template.formData?.subject || null)
-			};
-		}
-		
-		isValidPrototype = isPrototypeSpecificTemplate(formData);
-	}
+	const autoUpdateInterval = 5000; // ms
+	let previousFormSubmission = { ...$formData };
 
 	const handleSubmit = async (event, type) => {
 		const isDownload = type === 'download';
 		event.preventDefault();
 		// Check image before request
-		const isImageValid = await isValidImageURL(formData.image);
+		const isImageValid = await isValidImageURL(get(formData).image);
 		if (!isImageValid) {
 			formValidity.image = false;
 			await tick();
@@ -56,19 +24,18 @@
 			return;
 		}
 
-		const formDataFields = { date: formData.date, image: formData.image, signature_name: formData.signature_name, student_name: formData.student_name, subject: formData.subject };
+		const formDataFields = { date: $formData.date, image: $formData.image, signature_name: $formData.signature_name, student_name: $formData.student_name, subject: $formData.subject };
 		const updateDocumentPreview = async () => {
         try {
 			const response = await fetch("api/documents/generate", {
 				method: "POST",
 				headers: { "Content-Type": "application/json"},
 				body: JSON.stringify({
-					templateId: $selectedTemplateId,
+					templateId: $CertificateTemplateID,
 					formData: {...formDataFields},
 					isDownload: isDownload
 				}),
 			});
-
 			if (!response.ok) {
 				throw new Error("Failed to generate PDF");
 			}
@@ -81,10 +48,10 @@
 				triggerDownload(base64PDF, 'certificate');
 			}
 
-			previousFormSubmission = { ...formData };
-			} catch (error) {
-				console.error(error);
-			}
+			previousFormSubmission = { ...$formData };
+		} catch (error) {
+			console.error(error);
+		}
 		};
 		await updateDocumentPreview();
 	};
@@ -100,37 +67,33 @@
 	}
 
 	const handleInputChange = async (fieldName, value) => {
-		template.formData[fieldName] = value;
+		$formData[fieldName] = value;
 	};
 
 	// Reactive field checks
 	$: formValidity = {
-		image: formData.image !== null ? formData.image.length > 0 : true,
-		date: formData.date !== null ? isValidDate(formData.date) : true,
-		signature_name: formData.signature_name !== null ? isString(formData.signature_name) && formData.signature_name.length > 0 : true,
-		student_name: formData.student_name !== null ? isString(formData.student_name) && formData.student_name.length > 0 : true,
-		subject: formData.subject !== null ? isString(formData.subject) && formData.subject.length > 0 : true
+		image: $formData.image !== null ? $formData.image.length > 0 : true,
+		date: $formData.date !== null ? isValidDate($formData.date) : true,
+		signature_name: $formData.signature_name !== null ? isString($formData.signature_name) && $formData.signature_name.length > 0 : true,
+		student_name: $formData.student_name !== null ? isString($formData.student_name) && $formData.student_name.length > 0 : true,
+		subject: $formData.subject !== null ? isString($formData.subject) && $formData.subject.length > 0 : true
 	};
 
 	setInterval(autoUpdatePreview, autoUpdateInterval);
 </script>
 
-{#if formData}
-	{#if !isValidPrototype}
-		<p class="overlay-text">Invalid template: Not prototype-specific template</p>
-	{/if}
-
-	<div class="form-container {isValidPrototype ? '' : 'invalid-template'}">
+{#if $formData}
+	<div class="form-container">
 		<form on:submit={(e) => handleSubmit(e, 'preview')}>
-			{#each Object.keys(formData) as fieldName}
+			{#each Object.keys($formData) as fieldName}
 				<div class="form-group">
 					<label for={fieldName}>{fieldConfig[fieldName]?.placeholder ||fieldName}</label>
 					<div class="input-wrapper">
 						<input
 							type={fieldConfig[fieldName]?.type || "text"}
 							id={fieldName}
-							bind:value={formData[fieldName]}
-							placeholder={fieldConfig[fieldName]?.placeholder ||fieldName}
+							bind:value={$formData[fieldName]}
+							placeholder={fieldConfig[fieldName]?.placeholder || fieldName}
 							required
 							class:valid={formValidity[fieldName]}
 							class:invalid={!formValidity[fieldName]}
@@ -142,17 +105,13 @@
 					</div>
 				</div>
 			{/each}
-			{#if isValidPrototype}
-				<div class="btn-container">
-					<button type="submit" on:click={(e) => handleSubmit(e, 'preview')}>Preview document</button>
-					<button class="download-btn" type="button" on:click={(e) => handleSubmit(e, 'download')}>Download document</button>
-				</div>
-			{/if}
+			<div class="btn-container">
+				<button type="submit" on:click={(e) => handleSubmit(e, 'preview')}>Preview document</button>
+				<button class="download-btn" type="button" on:click={(e) => handleSubmit(e, 'download')}>Download document</button>
+			</div>
 		</form>
 		<div class="toggle-container">
-			{#if isValidPrototype}
-				<Switch bind:checked={isSwitchOn} label="Enable auto refresh" objScale="0.3"/>
-			{/if}
+			<Switch bind:checked={isSwitchOn} label="Enable auto refresh" objScale="0.3"/>
 		</div>
 	</div>
 {/if}
@@ -181,20 +140,6 @@
 		align-items: end;
 		position: relative;
 		width: 100%;
-	}
-
-	.form-container.invalid-template {
-		background: rgba(0, 0, 0, 0.2);
-		pointer-events: none;
-		filter: blur(5px);
-		opacity: 0.4;
-	}
-
-	.overlay-text {
-		color: red;
-		font-size: large;
-		font-weight: bold;
-		user-select: none;
 	}
 
 	.form-group {

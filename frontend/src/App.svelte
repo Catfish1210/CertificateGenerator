@@ -1,38 +1,45 @@
 <script>
+    import { onMount } from "svelte";
 	import ActiveForm from "./lib/ActiveForm.svelte";
     import DocumentPreview from "./lib/DocumentPreview.svelte";
-	import Templates from "./lib/Templates.svelte";
-	import { generatedPDF, selectedTemplateId } from "./store";
+	import { CertificateTemplateID } from "./store";
+
+	let error = {};
+	const loadTemplates = async () => {
+        try {
+            const response = await fetch("/api/templates");
+            if (!response.ok) throw new Error("Failed to fetch templates");
+            const data = await response.json();
+            CertificateTemplateID.set(data.id);
+        } catch (err) {
+            error = err.message;
+        }
+    };
+	
+    onMount(async () => {
+        await loadTemplates();
+    });
+
 </script>
 
 <main>
 	<h1 class="glow title">Certificate Generator</h1>
 
 	<div class="section-container">
-		<div id="template-section" class="section">
-			<div>
-				<h3 style="margin-top:0.5rem; margin-left: 0.5rem; user-select: none;"> Templates </h3>
-				<Templates />
-			</div>
-		</div>
-		{#if $selectedTemplateId !== null}
 			<div id="form-section" class="section">
 				<div>
 					<h3 style="margin: 0; margin-top:0.5rem; margin-left: 0.5rem; user-select: none;">Form</h3>
 					<ActiveForm />
 				</div>
 			</div>
-		{/if}
-		{#if $selectedTemplateId !== null && $generatedPDF !== null }
 			<div id="document-preview-section" class="section">
 				<DocumentPreview />
 			</div>
-		{/if}
 	</div>
 </main>
 
 <style>
-	#template-section {
+	#form-section {
 		display: flex;
 		justify-content: center;
 		width: 50vh;

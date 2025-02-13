@@ -1,4 +1,5 @@
 require('dotenv').config();
+const { handleApiError, handleCatchError} = require('./errorHandler');
 const express = require('express');
 const router = express.Router();
 
@@ -37,6 +38,11 @@ router.post('/documents/generate', async (req, res) => {
             })
         });
 
+        if (!response.ok) {
+            const errResponse = await response.json();
+            return handleApiError(response.status, errResponse.message, res);
+        }
+
         const data = await response.json();
         res.json({ pdf: data.response });
     } catch (error) {
@@ -45,40 +51,29 @@ router.post('/documents/generate', async (req, res) => {
 });
 
 
-// Fetch template data fields with templateID [GET]
-router.get('/templates/form/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        const response = await fetch(`${process.env.API_BASE_URL}/templates/${id}/data`, {
-            headers: {
-                Authorization: `Bearer ${generateJWT()}`
-            }
-        });
-        if (!response.ok) {
-            throw new Error(`Failed to fetch formData for template ${id}`);
-        }
-        
-        const data = await response.json();
-        res.json({ formData: data.response || {} });
-    } catch (err) {
-        console.error(`Failed to fetch formData for template ${id}:`, err);
-        return {}
-    }
-})
-
-// Fetch list of templates [GET]
+// Fetch a template with matching name and then return the ID: 'Certificate Example' [GET]
 router.get('/templates', async (req, res) => {
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/templates`, {
+        const response = await fetch(`${process.env.API_BASE_URL}/templates?name=Certificate Example&per_page=1`, {
             headers: {
                 Authorization: `Bearer ${generateJWT()}`
             }
         });
+        
+        if (!response.ok) {
+            const errResponse = await response.json();
+            return handleApiError(response.status, errResponse.message, res);
+        }
+
         const data = await response.json();
-        console.log(data);
-        res.json(data);
-    } catch (error) {
-        res.status(500).json({ error: "Failed to fetch templates" });
+        const ID = data.response[0].id;
+        if (ID) {
+            res.json({ id: ID });
+        } else {
+            res.status(404).json({ error: "ID for Template with the name 'Certificate Example' not found" });
+        }
+    } catch (err) {
+        handleCatchError(err, res);
     }
 });
 

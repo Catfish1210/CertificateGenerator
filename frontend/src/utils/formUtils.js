@@ -19,22 +19,6 @@ export const isString = (value) => {
 	return typeof value === "string" && value.length > 0 && !/\d/.test(value);
 };
 
-const requiredFields = [
-	"date",
-	"image",
-	"signature_name",
-	"student_name",
-	"subject",
-];
-
-export const isPrototypeSpecificTemplate = (templateFormData) => {
-	const templateFields = Object.keys(templateFormData);
-	return (
-		templateFields.length === requiredFields.length &&
-		requiredFields.every((field) => templateFields.includes(field))
-	)
-};
-
 export const fieldConfig = {
 	date: {
 		type: "date",

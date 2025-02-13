@@ -2,6 +2,7 @@ require('dotenv').config();
 const { handleApiError, handleCatchError} = require('./errorHandler');
 const express = require('express');
 const router = express.Router();
+const {db, insertForm, insertDocument, insertNewDbEntry } = require('./database/database');
 
 const generateJWT = () => {
     const jwt = require('jsonwebtoken');
@@ -42,6 +43,12 @@ router.post('/documents/generate', async (req, res) => {
             const errResponse = await response.json();
             return handleApiError(response.status, errResponse.message, res);
         }
+        // Save document to database if user clicks download
+        let documentNumber; // [WIP]
+        const date = new Date();
+        if (isDownload) {
+            documentNumber = insertNewDbEntry(formData, process.env.PDF_GENERATOR_API_WORKSPACE_ID, parseInt(templateId, 10), date.toISOString())
+        }
 
         const data = await response.json();
         res.json({ pdf: data.response });
@@ -49,7 +56,6 @@ router.post('/documents/generate', async (req, res) => {
         res.status(500).json({ error: `Failed to generate certificate: ${error}` });
     }
 });
-
 
 // Fetch a template with matching name and then return the ID: 'Certificate Example' [GET]
 router.get('/templates', async (req, res) => {

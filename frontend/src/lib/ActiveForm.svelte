@@ -13,14 +13,24 @@
 	let previousFormSubmission = { ...$formData };
 
 	const handleSubmit = async (event, type) => {
-		const isDownload = type === 'download';
 		event.preventDefault();
+		const isDownload = type === 'download';
+
 		// Check image before request
 		const isImageValid = await isValidImageURL(get(formData).image);
 		if (!isImageValid) {
 			formValidity.image = false;
 			await tick();
 			console.error("Invalid image URL (jpg, jpeg, png): not making request.");
+			return;
+		} else {
+			formValidity.image = true;
+		}
+
+		// Check form validity
+		const isFormValid = Object.values(formValidity).every(value => value === true);
+		if (!isFormValid) {
+			console.error("Invalid form or missing fields");
 			return;
 		}
 
@@ -57,8 +67,7 @@
 	};
 
 	const autoUpdatePreview = () => {
-		if (isSwitchOn && Object.values(formValidity).every((valid) => valid) && 
-		Date.now() - lastUpdateTimestamp >= autoUpdateInterval &&
+		if (isSwitchOn && Date.now() - lastUpdateTimestamp >= autoUpdateInterval &&
 		JSON.stringify(formData) !== JSON.stringify(previousFormSubmission)
 		) {
 			document.querySelector("button[type='submit']").click();
@@ -72,11 +81,11 @@
 
 	// Reactive field checks
 	$: formValidity = {
-		image: $formData.image !== null ? $formData.image.length > 0 : true,
-		date: $formData.date !== null ? isValidDate($formData.date) : true,
-		signature_name: $formData.signature_name !== null ? isString($formData.signature_name) && $formData.signature_name.length > 0 : true,
-		student_name: $formData.student_name !== null ? isString($formData.student_name) && $formData.student_name.length > 0 : true,
-		subject: $formData.subject !== null ? isString($formData.subject) && $formData.subject.length > 0 : true
+		image: $formData.image ? $formData.image.length > 0 : false,
+		date: $formData.date ? isValidDate($formData.date) : false,
+		signature_name: $formData.signature_name ? isString($formData.signature_name) && $formData.signature_name.length > 0 : false,
+		student_name: $formData.student_name ? isString($formData.student_name) && $formData.student_name.length > 0 : false,
+		subject: $formData.subject ? isString($formData.subject) && $formData.subject.length > 0 : false
 	};
 
 	setInterval(autoUpdatePreview, autoUpdateInterval);

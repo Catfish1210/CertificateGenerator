@@ -89,9 +89,7 @@ router.get('/templates', async (req, res) => {
 
 // Get document history with templateId + workspaceID
 router.get('/document-history', async(req, res) => {
-    console.log(process.env.PDF_GENERATOR_API_WORKSPACE_ID);
     const { templateId } = req.query;
-    console.log(templateId);
     if (!templateId) {
         return handleApiError(400, 'Missing templateId', res);
     }

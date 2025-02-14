@@ -7,7 +7,7 @@ const dbFile = process.env.NODE_ENV === 'test' ? 'db-test.sqlite' : 'app.sqlite'
 const dbPath = path.join(__dirname, dbFile);
 const dbExists = fs.existsSync(dbPath);
 
-const db = new Database(dbPath, { verbose: console.log });
+const db = new Database(dbPath);
 
 if(!dbExists) {
     // Forms

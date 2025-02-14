@@ -46,10 +46,7 @@
 					isDownload: isDownload
 				}),
 			});
-			if (!response.ok) {
-				throw new Error("Failed to generate PDF");
-			}
-
+			
 			const json = await response.json();
 			// [WIP]
 			const base64PDF = json.pdf;

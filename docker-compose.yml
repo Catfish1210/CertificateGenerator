@@ -1,0 +1,19 @@
+services:
+  app:
+    container_name: Cert-Gen
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    environment:
+      - NODE_ENV=development
+      - FORCE_COLOR=1
+    volumes:
+      - ./backend:/CertificateGenerator/backend
+      - ./frontend:/CertificateGenerator/frontend
+      - ./node_modules:/CertificateGenerator/node_modules
+      - ./CertificateGenerator/backend/node_modules
+      - ./CertificateGenerator/frontend/node_modules
+    command: ["npm", "run", "start"]

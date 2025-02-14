@@ -59,8 +59,14 @@ router.post('/documents/generate', async (req, res) => {
 
 // Fetch a template with matching name and then return the ID: 'Certificate Example' [GET]
 router.get('/templates', async (req, res) => {
+    const queryParams = new URLSearchParams({
+        name: 'Certificate Example',
+        per_page: '1'
+    });
+    const url = `${process.env.PDF_GENERATOR_API_BASE_URL}/templates?${queryParams.toString()}`;
+
     try {
-        const response = await fetch(`${process.env.PDF_GENERATOR_API_BASE_URL}/templates?name=Certificate Example&per_page=1`, {
+        const response = await fetch(url, {
             headers: {
                 Authorization: `Bearer ${generateJWT()}`
             }

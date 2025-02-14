@@ -1,7 +1,7 @@
 <script>
 	// @ts-nocheck
 	import Switch from "./Switch.svelte";
-	import { selectedTemplateId, generatedPdf, formData, CertificateTemplateId } from "../store";
+	import { selectedTemplateId, generatedPdf, formData, CertificateTemplateId, showDocumentHistory, updateDocumentHistory } from "../store";
 	import { get } from "svelte/store";
 	import { isValidDate, isValidImageURL, isString, fieldConfig, triggerDownload } from "../utils/formUtils";
     import { tick } from "svelte";
@@ -54,7 +54,6 @@
 			});
 
 			const json = await response.json();
-			// [WIP]
 			const base64Pdf = json.pdf;
         	generatedPdf.set(base64Pdf);
 
@@ -68,6 +67,7 @@
 		if (type === 'download') {
 			let pdf = get(generatedPdf);
 			triggerDownload(pdf, 'certificate');
+			updateDocumentHistory()
 		}
 	};
 
@@ -134,8 +134,11 @@
 			</div>
 		</form>
 		<div class="toggle-container">
-			<Switch bind:checked={isSwitchOn} label="Enable auto refresh" objScale="0.3"/>
+			<Switch id="auto-refresh" bind:checked={isSwitchOn} label="Enable auto refresh" statusText="Auto refresh (5s)" objScale="0.3"/>
 		</div>
+	</div>
+	<div class="toggle-container">
+		<Switch id="show-history" bind:checked={$showDocumentHistory} label="Show document history" statusText="Show document History" objScale="0.3"/>
 	</div>
 {/if}
 

@@ -82,6 +82,15 @@
 
 	const handleInputChange = async (fieldName, value) => {
 		$formData[fieldName] = value;
+		modifiedFields[fieldName] = true;
+	};
+
+	let modifiedFields = {
+		image: false,
+		date: false,
+		signature_name: false,
+		student_name: false,
+		subject: false
 	};
 
 	// Reactive field checks
@@ -109,11 +118,11 @@
 							bind:value={$formData[fieldName]}
 							placeholder={fieldConfig[fieldName]?.placeholder || fieldName}
 							required
-							class:valid={formValidity[fieldName]}
-							class:invalid={!formValidity[fieldName]}
+							class:valid={modifiedFields[fieldName] && formValidity[fieldName]}
+							class:invalid={modifiedFields[fieldName] && !formValidity[fieldName]}
 							on:input={(e) => handleInputChange(fieldName, e.currentTarget.value)}
 						/>
-						{#if !formValidity[fieldName]}
+						{#if modifiedFields[fieldName] && !formValidity[fieldName]}
 							<p class="error-message">{fieldConfig[fieldName]?.errorMessage || "Invalid input."}</p>
 						{/if}
 					</div>

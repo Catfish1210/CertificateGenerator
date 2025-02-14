@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
 
-export const generatedPDF = writable(null);
-export const CertificateTemplateID = writable(null);
+export const generatedPdf = writable(null);
+export const CertificateTemplateId = writable(null);
 export const selectedTemplateId = writable(null);
 export const formData = writable({
     date: null,

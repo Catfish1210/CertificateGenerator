@@ -1,7 +1,7 @@
 <script>
-    import { onMount, tick } from "svelte";
+    import { onMount } from "svelte";
     import { get } from "svelte/store";
-    import { CertificateTemplateID, selectedTemplateId } from "../store.js";
+    import { CertificateTemplateId, selectedTemplateId } from "../store.js";
     let error = null;
 
     const loadTemplates = async () => {
@@ -9,7 +9,7 @@
             const response = await fetch("/api/templates");
             if (!response.ok) throw new Error("Failed to fetch templates");
             const data = await response.json();
-            CertificateTemplateID.set(data.id);
+            CertificateTemplateId.set(data.id);
         } catch (err) {
             error = err.message;
         }
@@ -19,12 +19,12 @@
         await loadTemplates();
     });
     let id;
-    $: {id = get(CertificateTemplateID)}
+    $: {id = get(CertificateTemplateId)}
     const toggleSelectedTemplate = () => {
-        if (get(CertificateTemplateID) === get(CertificateTemplateID)) {
+        if (get(CertificateTemplateId) === get(CertificateTemplateId)) {
             selectedTemplateId.set(null);  
         } else {
-            selectedTemplateId.set(get(CertificateTemplateID));
+            selectedTemplateId.set(get(CertificateTemplateId));
         }
     };
 </script>
@@ -69,7 +69,7 @@
     <div class="template-container">
         <!-- svelte-ignore a11y_label_has_associated_control -->
         <!-- svelte-ignore a11y_click_events_have_key_events -->
-        <label class="template-box {get(selectedTemplateId) === get(CertificateTemplateID) ? 'selected' : ''}"
+        <label class="template-box {get(selectedTemplateId) === get(CertificateTemplateId) ? 'selected' : ''}"
                 on:click={toggleSelectedTemplate}>
                 Certificate Example
         </label>

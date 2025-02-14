@@ -1,7 +1,7 @@
 <script>
 	// @ts-nocheck
 	import Switch from "./Switch.svelte";
-	import { selectedTemplateId, generatedPDF, formData, CertificateTemplateID } from "../store";
+	import { selectedTemplateId, generatedPdf, formData, CertificateTemplateId } from "../store";
 	import { get } from "svelte/store";
 	import { isValidDate, isValidImageURL, isString, fieldConfig, triggerDownload } from "../utils/formUtils";
     import { tick } from "svelte";
@@ -41,16 +41,16 @@
 				method: "POST",
 				headers: { "Content-Type": "application/json"},
 				body: JSON.stringify({
-					templateId: $CertificateTemplateID,
+					templateId: $CertificateTemplateId,
 					formData: {...formDataFields},
 					isDownload: isDownload
 				}),
 			});
-			
+
 			const json = await response.json();
 			// [WIP]
 			const base64PDF = json.pdf;
-        	generatedPDF.set(base64PDF);
+        	generatedPdf.set(base64PDF);
 
 			previousFormSubmission = { ...$formData };
 		} catch (error) {
@@ -60,7 +60,7 @@
 		await updateDocumentPreview();
 
 		if (type === 'download') {
-			let pdf = get(generatedPDF);
+			let pdf = get(generatedPdf);
 			triggerDownload(pdf, 'certificate');
 		}
 	};

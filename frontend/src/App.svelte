@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
 	import ActiveForm from "./lib/ActiveForm.svelte";
     import DocumentPreview from "./lib/DocumentPreview.svelte";
-	import { CertificateTemplateID } from "./store";
+	import { CertificateTemplateId } from "./store";
 
 	let error = {};
 	const loadTemplates = async () => {
@@ -10,7 +10,7 @@
             const response = await fetch("/api/templates");
             if (!response.ok) throw new Error("Failed to fetch templates");
             const data = await response.json();
-            CertificateTemplateID.set(data.id);
+            CertificateTemplateId.set(data.id);
         } catch (err) {
             error = err.message;
         }

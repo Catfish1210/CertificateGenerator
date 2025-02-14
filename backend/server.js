@@ -11,5 +11,5 @@ app.get('/', (req, res) => {
     res.send("Backend running");
 });
 
-const PORT = 3000;
+const PORT = 8000;
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));

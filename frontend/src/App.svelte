@@ -1,9 +1,11 @@
 <script>
     import { onMount } from "svelte";
+	import { fly } from "svelte/transition";
 	import ActiveForm from "./lib/ActiveForm.svelte";
     import DocumentPreview from "./lib/DocumentPreview.svelte";
-	import { CertificateTemplateId } from "./store";
-
+	import DocumentHistory from "./lib/DocumentHistory.svelte";
+	import { CertificateTemplateId, showDocumentHistory, updateDocumentHistory } from "./store";
+	
 	let error = {};
 	const loadTemplates = async () => {
         try {
@@ -18,6 +20,7 @@
 	
     onMount(async () => {
         await loadTemplates();
+		await updateDocumentHistory();
     });
 </script>
 
@@ -33,14 +36,37 @@
 		<div id="document-preview-section" class="section">
 			<DocumentPreview />
 		</div>
+		{#if $showDocumentHistory}
+		<div id="document-history-section" class="section" transition:fly={{x: -200, duration: 300}}>
+			<h3 class="section-header">Document History</h3>
+			<div class="document-history">
+				<DocumentHistory />
+			</div>
+		</div>
+		{/if}
 	</div>
 </main>
 
 <style>
+	.document-history {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: flex-start;
+	}
+
+	#document-history-section {
+		height: 75vh;
+		width: 58vh;
+		min-width: 290px;
+	}
+
 	#form-section {
 		display: flex;
 		justify-content: center;
 		width: 58vh;
+		min-width: 410px;
 	}
 
 	.section {

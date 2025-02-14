@@ -9,7 +9,7 @@
 	// Auto refresh feature variables
 	let isSwitchOn = false;
 	let lastUpdateTimestamp = 0;
-	const autoUpdateInterval = 5000; // ms
+	const autoUpdateFrequencyMs = 5000;
 	let previousFormSubmission = { ...$formData };
 
 	const handleSubmit = async (event, type) => {
@@ -34,7 +34,13 @@
 			return;
 		}
 
-		const formDataFields = { date: $formData.date, image: $formData.image, signature_name: $formData.signature_name, student_name: $formData.student_name, subject: $formData.subject };
+		const formDataFields = {
+			date: $formData.date,
+			image: $formData.image,
+			signature_name: $formData.signature_name,
+			student_name: $formData.student_name,
+			subject: $formData.subject
+		};
 		const updateDocumentPreview = async () => {
         try {
 			const response = await fetch("api/documents/generate", {
@@ -49,8 +55,8 @@
 
 			const json = await response.json();
 			// [WIP]
-			const base64PDF = json.pdf;
-        	generatedPdf.set(base64PDF);
+			const base64Pdf = json.pdf;
+        	generatedPdf.set(base64Pdf);
 
 			previousFormSubmission = { ...$formData };
 		} catch (error) {
@@ -66,7 +72,7 @@
 	};
 
 	const autoUpdatePreview = () => {
-		if (isSwitchOn && Date.now() - lastUpdateTimestamp >= autoUpdateInterval &&
+		if (isSwitchOn && Date.now() - lastUpdateTimestamp >= autoUpdateFrequencyMs &&
 		JSON.stringify(formData) !== JSON.stringify(previousFormSubmission)
 		) {
 			document.querySelector("button[type='submit']").click();
@@ -87,7 +93,7 @@
 		subject: $formData.subject ? isString($formData.subject) && $formData.subject.length > 0 : false
 	};
 
-	setInterval(autoUpdatePreview, autoUpdateInterval);
+	setInterval(autoUpdatePreview, autoUpdateFrequencyMs);
 </script>
 
 {#if $formData}

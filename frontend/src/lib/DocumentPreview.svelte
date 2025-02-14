@@ -1,19 +1,18 @@
 <script>
     import { onDestroy } from "svelte";
-    import { generatedPDF } from "../store";
+    import { generatedPdf } from "../store";
 
-    let base64PDF = '';
-    const unsubscribe = generatedPDF.subscribe((pdf) => {
-        base64PDF = pdf;
+    let base64Pdf = '';
+    const unsubscribe = generatedPdf.subscribe((pdf) => {
+        base64Pdf = pdf;
     });
 
     onDestroy(unsubscribe);
 </script>
 
-{#if base64PDF}
+{#if base64Pdf}
     <iframe
-        src="data:application/pdf;base64,{base64PDF}"
-        style="width: 100%; height: 100%; border: none;"
+        src="data:application/pdf;base64,{base64Pdf}"
         title="Certificate Preview"
     ></iframe>
 {:else}
@@ -23,6 +22,12 @@
 {/if}
 
 <style>
+    iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+    
     .container {
         width: 100%;
         height: 100%;

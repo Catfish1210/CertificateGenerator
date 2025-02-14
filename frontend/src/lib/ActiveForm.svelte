@@ -1,7 +1,7 @@
 <script>
 	// @ts-nocheck
 	import Switch from "./Switch.svelte";
-	import { selectedTemplateId, generatedPDF, formData, CertificateTemplateID } from "../store";
+	import { selectedTemplateId, generatedPdf, formData, CertificateTemplateId, showDocumentHistory, updateDocumentHistory } from "../store";
 	import { get } from "svelte/store";
 	import { isValidDate, isValidImageURL, isString, fieldConfig, triggerDownload } from "../utils/formUtils";
     import { tick } from "svelte";
@@ -9,7 +9,7 @@
 	// Auto refresh feature variables
 	let isSwitchOn = false;
 	let lastUpdateTimestamp = 0;
-	const autoUpdateInterval = 5000; // ms
+	const autoUpdateFrequencyMs = 5000;
 	let previousFormSubmission = { ...$formData };
 
 	const handleSubmit = async (event, type) => {
@@ -34,26 +34,28 @@
 			return;
 		}
 
-		const formDataFields = { date: $formData.date, image: $formData.image, signature_name: $formData.signature_name, student_name: $formData.student_name, subject: $formData.subject };
+		const formDataFields = {
+			date: $formData.date,
+			image: $formData.image,
+			signature_name: $formData.signature_name,
+			student_name: $formData.student_name,
+			subject: $formData.subject
+		};
 		const updateDocumentPreview = async () => {
         try {
 			const response = await fetch("api/documents/generate", {
 				method: "POST",
 				headers: { "Content-Type": "application/json"},
 				body: JSON.stringify({
-					templateId: $CertificateTemplateID,
+					templateId: $CertificateTemplateId,
 					formData: {...formDataFields},
 					isDownload: isDownload
 				}),
 			});
-			if (!response.ok) {
-				throw new Error("Failed to generate PDF");
-			}
 
 			const json = await response.json();
-			// [WIP]
-			const base64PDF = json.pdf;
-        	generatedPDF.set(base64PDF);
+			const base64Pdf = json.pdf;
+        	generatedPdf.set(base64Pdf);
 
 			previousFormSubmission = { ...$formData };
 		} catch (error) {
@@ -63,13 +65,14 @@
 		await updateDocumentPreview();
 
 		if (type === 'download') {
-			let pdf = get(generatedPDF);
+			let pdf = get(generatedPdf);
 			triggerDownload(pdf, 'certificate');
+			updateDocumentHistory()
 		}
 	};
 
 	const autoUpdatePreview = () => {
-		if (isSwitchOn && Date.now() - lastUpdateTimestamp >= autoUpdateInterval &&
+		if (isSwitchOn && Date.now() - lastUpdateTimestamp >= autoUpdateFrequencyMs &&
 		JSON.stringify(formData) !== JSON.stringify(previousFormSubmission)
 		) {
 			document.querySelector("button[type='submit']").click();
@@ -79,6 +82,15 @@
 
 	const handleInputChange = async (fieldName, value) => {
 		$formData[fieldName] = value;
+		modifiedFields[fieldName] = true;
+	};
+
+	let modifiedFields = {
+		image: false,
+		date: false,
+		signature_name: false,
+		student_name: false,
+		subject: false
 	};
 
 	// Reactive field checks
@@ -90,7 +102,7 @@
 		subject: $formData.subject ? isString($formData.subject) && $formData.subject.length > 0 : false
 	};
 
-	setInterval(autoUpdatePreview, autoUpdateInterval);
+	setInterval(autoUpdatePreview, autoUpdateFrequencyMs);
 </script>
 
 {#if $formData}
@@ -106,11 +118,11 @@
 							bind:value={$formData[fieldName]}
 							placeholder={fieldConfig[fieldName]?.placeholder || fieldName}
 							required
-							class:valid={formValidity[fieldName]}
-							class:invalid={!formValidity[fieldName]}
+							class:valid={modifiedFields[fieldName] && formValidity[fieldName]}
+							class:invalid={modifiedFields[fieldName] && !formValidity[fieldName]}
 							on:input={(e) => handleInputChange(fieldName, e.currentTarget.value)}
 						/>
-						{#if !formValidity[fieldName]}
+						{#if modifiedFields[fieldName] && !formValidity[fieldName]}
 							<p class="error-message">{fieldConfig[fieldName]?.errorMessage || "Invalid input."}</p>
 						{/if}
 					</div>
@@ -122,8 +134,11 @@
 			</div>
 		</form>
 		<div class="toggle-container">
-			<Switch bind:checked={isSwitchOn} label="Enable auto refresh" objScale="0.3"/>
+			<Switch id="auto-refresh" bind:checked={isSwitchOn} label="Enable auto refresh" statusText="Auto refresh (5s)" objScale="0.3"/>
 		</div>
+	</div>
+	<div class="toggle-container">
+		<Switch id="show-history" bind:checked={$showDocumentHistory} label="Show document history" statusText="Show document History" objScale="0.3"/>
 	</div>
 {/if}
 

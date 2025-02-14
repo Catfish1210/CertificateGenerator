@@ -24,15 +24,15 @@
 <main>
 	<h1 class="glow title">Certificate Generator</h1>
 	<div class="section-container">
-			<div id="form-section" class="section">
-				<div>
-					<h3 style="margin: 0; margin-top:0.5rem; margin-left: 0.5rem; user-select: none;">Form</h3>
-					<ActiveForm />
-				</div>
+		<div id="form-section" class="section">
+			<div>
+				<h3 class="section-header">Form</h3>
+				<ActiveForm />
 			</div>
-			<div id="document-preview-section" class="section">
-				<DocumentPreview />
-			</div>
+		</div>
+		<div id="document-preview-section" class="section">
+			<DocumentPreview />
+		</div>
 	</div>
 </main>
 
@@ -50,6 +50,13 @@
 		border: 2px solid whitesmoke;
 		border-radius: 9px;
 		overflow: scroll;
+	}
+
+	.section-header {
+		margin: 0;
+		margin-top:0.5rem;
+		margin-left: 0.5rem;
+		user-select: none;
 	}
 
 	.section-container {

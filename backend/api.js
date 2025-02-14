@@ -2,7 +2,7 @@ require('dotenv').config();
 const { handleApiError, handleCatchError} = require('./errorHandler');
 const express = require('express');
 const router = express.Router();
-const {db, insertForm, insertDocument, insertNewDbEntry } = require('./database/database');
+const { insertNewDbEntry, getDocumentHistory } = require('./database/database');
 
 const generateJWT = () => {
     const jwt = require('jsonwebtoken');
@@ -43,11 +43,9 @@ router.post('/documents/generate', async (req, res) => {
             const errResponse = await response.json();
             return handleApiError(response.status, errResponse.message, res);
         }
-        // Save document to database if user clicks download
-        let documentNumber; // [WIP]
         const date = new Date();
         if (isDownload) {
-            documentNumber = insertNewDbEntry(formData, process.env.PDF_GENERATOR_API_WORKSPACE_ID, parseInt(templateId, 10), date.toISOString())
+            insertNewDbEntry(formData, process.env.PDF_GENERATOR_API_WORKSPACE_ID, parseInt(templateId, 10), date.toISOString())
         }
 
         const data = await response.json();
@@ -84,6 +82,32 @@ router.get('/templates', async (req, res) => {
         } else {
             res.status(404).json({ error: "ID for Template with the name 'Certificate Example' not found" });
         }
+    } catch (err) {
+        handleCatchError(err, res);
+    }
+});
+
+// Get document history with templateId + workspaceID
+router.get('/document-history', async(req, res) => {
+    console.log(process.env.PDF_GENERATOR_API_WORKSPACE_ID);
+    const { templateId } = req.query;
+    console.log(templateId);
+    if (!templateId) {
+        return handleApiError(400, 'Missing templateId', res);
+    }
+    try {
+        /*
+        *   Contextual authorization measure:
+        *   The combination of templateID and WorkspaceID ensures that the document history
+        *   is correctly associated with appropriate workspace and template.
+        *   By including both templateID and workspaceID, we account for the
+        *   fact that templateID fetch requires API authentication via secure JWT.
+        *   This approach ensures that, when the .env file changes, the database
+        *   will consistently return document history that matches the correct user
+        *   maintaining security across sessions.
+        */
+        const documentHistory = getDocumentHistory(process.env.PDF_GENERATOR_API_WORKSPACE_ID, templateId);
+        res.json({ documentHistory });
     } catch (err) {
         handleCatchError(err, res);
     }

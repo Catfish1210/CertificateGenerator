@@ -60,4 +60,18 @@ const insertDocument = (workspace_id, template_id, form_data_id, created_at) => 
     return insert.lastInsertRowid;
 }
 
-module.exports = {db, insertDocument, insertForm, insertNewDbEntry};
+const getDocumentHistory = (workspace_id, template_id) => {
+    const query = `
+        SELECT f.*, d.created_at AS document_created_at
+        FROM documents d
+        JOIN forms f ON f.id = d.form_data_id
+        WHERE d.template_id = ? AND d.workspace_id = ?
+        ORDER BY d.created_at DESC;
+    `;
+    const result = db.prepare(query).all(template_id, workspace_id);
+
+    return result;
+}
+
+
+module.exports = {db, insertDocument, insertForm, insertNewDbEntry, getDocumentHistory};

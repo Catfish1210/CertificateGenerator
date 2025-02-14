@@ -1,18 +1,33 @@
 <script>
     export let checked = false;
-    export let label = "Toggle"
+    export let label;
+    export let objScale = 0.6;
+    export let statusText;
+    export let id;
     let width = "200px";
     let height = "100px";
-    export let objScale = 0.6;
 </script>
 
-<div style="display: flex; flex-direction: column; align-items: center; width: fit-content;">
-    <input type="checkbox" id="switch" bind:checked />
-    <label for="switch" style="width: {width}; height: {height}; transform: scale({objScale});">{label}</label>
-    <p style="user-select: none; margin: 0; text-align: center;">Auto refresh (5s): {checked ? "ON" : "OFF"}</p>
+<div class="container">
+    <input type="checkbox" id={id} bind:checked />
+    <label for={id} style="width: {width}; height: {height}; transform: scale({objScale});">{label}</label>
+    <p>{statusText}: {checked ? "ON" : "OFF"}</p>
 </div>
 
 <style>
+    p {
+        user-select: none;
+        margin: 0;
+        text-align: center;
+    }
+    
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: fit-content;
+    }
+
     input[type=checkbox] {
       height: 0;
       width: 0;

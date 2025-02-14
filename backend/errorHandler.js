@@ -2,6 +2,9 @@
 const handleApiError = (statusCode, message, res) => {
     let error;
     switch (statusCode) {
+        case 400:
+            error = message || 'Bad Request';
+            break;
         case 401:
             error = message || 'Unauthorized: Authentication failed.';
             break;
